@@ -1,5 +1,6 @@
 # Python 学习
 # 汉诺塔
+
 a = "1"
 b = "2"
 c = "3"
@@ -69,3 +70,26 @@ print(yueyue.name)
 print(yueyue.age)
 
 yueyue.doHomework()
+
+
+class Student1():
+    name = "dana"
+    age = 10
+
+    def say(self):
+        self.name = "haha"
+        self.age = 19
+        print("My name is {0}".format(self.name))
+        print("My age {0}".format(self.age))
+
+    def say1():
+
+        print("My name is {0}".format(__class__.name))
+        print("My age {0}".format(__class__.age))
+
+
+heihei = Student1()
+heihei.say()
+Student1.say1()
+
+
