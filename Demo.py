@@ -55,7 +55,7 @@ class PythonStudent():
     name = None
     age = 19
     course = "Python"
-
+ #啊撒大声地阿斯达暗示
     # 需要注意的
     # 1.def doHomework 的缩进层级
     # 2. 系统默认由一个self参数
