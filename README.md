@@ -1,6 +1,10 @@
 # helloWord
 Python练习项目
-
+# 下划线约定方法：
+   - _xxx:表示内部使用,不能被from M imoprt *导入
+   - xxx_:表示避免和关键字冲突,如Tkinter.Toplevel(master, class_='ClassName')
+   - __xxx:更彻底的private.用到了name mangling技术,会自动加上类名前缀.不能被子类和类外访问.
+   - __xxx__:魔术方法或用户控制的命名空间.
 
 # oop -Python面向对象
 - python 的面向对象
@@ -101,6 +105,7 @@ Python练习项目
     - 对象内部
     - 对象外部
     - 子类中
+    【下划线使用】https://blog.csdn.net/handsomekang/article/details/40303207
  - 私有
     - 私有成员最高级别的封装，只能在当前类或对象中访问
     - 在成员前面添加两个下划线即可
@@ -111,4 +116,25 @@ Python练习项目
             __age = 12  
     - Python 的私有不是真正的私有 是一种为 name mangling 的改名策略
     可以使用对象._classname_attributename访问
-      
+ - 受保护的封装 protected 
+    - 受保护的封装是将对象成员进行一定级别的封装，然后在类中或者子类中都可以进行访问，但是在外部不可以
+    - 封装方法：在成员名称前边添加一个下划线即可
+ - 公开的，公共的 public
+    - 公共的封装实际对成员没有任何操作限制，任何地方都可以访问   
+    
+# 3.2继承
+- 继承就是一个类可以获得另外一个类中的成员属性和成员方法
+- 作用：减少代码，增加代码的复用功能，同时可以设置类与类直接的关系
+- 继承与被继承的概念
+    - 被继承的类叫父类，也叫基类，也叫超类
+    - 用于继承的类，叫子类，也叫派生类
+    - 继承与被继承一定存在一个 is-a 关系
+    - 继承的语法：
+    - 在python中，任何类都有一个共同的父类叫object
+       - class Person():
+            - name = "NoName"
+            - age = 0
+            - def sleep(self):
+                - print("Sleeping..")
+        
+
