@@ -71,7 +71,7 @@ class Teacher2(Person2):
         # 扩充父类的功能只需要调用相同的函数就可以了
         # super().work() 和 Person2.wotk(self) 是一样的
        # super().work()
-        Person2.wotk(self)
+        Person2.work(self)
         self.make_test()
 
 t = Teacher2()
