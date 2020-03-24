@@ -206,3 +206,13 @@ Python练习项目
     - 可以方便的组织和维护不同功能组件的划分
     - 可以根据需要任意吊证功能类的组合
     - 可以避免创建很多新的类，导致类的继承混乱
+    
+    
+## 4 类 相关函数
+- issubclass :检测一个类是否是另一个类的子类
+- isinstance :检测一个对象是否是一个类的实例
+- hasattr :检测一个对象是否含有成员XXX
+- getattr: get attribute
+- setattr: set attribute
+- delattr: delete attribute
+- dir :获取对象成员列表
