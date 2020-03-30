@@ -1,1 +1,3 @@
-print(help(super))
+
+
+help(print)

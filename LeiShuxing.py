@@ -61,7 +61,7 @@ class Studen():
     name = property(fget,fset,fdel,"对age进行赋值")
 
 pp = Studen()
-pp.age = ("%.0f"%1.5)
+pp.age = (int(1.6))
 print(pp.age)
 print(Person.__dict__)
 print(Person.__doc__)
