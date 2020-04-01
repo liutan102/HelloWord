@@ -1,7 +1,15 @@
 # calendar
 # 跟日历相关的模块
 # 需要先导入
+from datetime import datetime
+from datetime import timedelta
 import calendar
+import locale
+import time
+import datetime
+
+
+
 # calendar:获取一年的日历字符串
 # 参数
 # w = 每个日期之间的间隔字符数
@@ -52,7 +60,7 @@ calendar.prmonth(2020,1)
 print(calendar.weekday(2020,2,20))
 
 # 需要单独导入
-import time
+
 # 时间模块的属性
 # timezone ；当前时区和UTC时间相差的秒数，有没有夏令时的情况下的间隔,东八区的是 -28800
 # altzone 获取当前时区与UTC时间相差的秒数，在没有夏令时的情况下
@@ -98,17 +106,49 @@ for i in  range(1,10):
     time.sleep(0)
 
 
-#help(range)
-
 # strftime;将时间元组转化为自定义的字符串格式
 
 # 把时间表示成 2020.3.31 17.27
-import locale
+
 locale.setlocale(locale.LC_CTYPE,'chinese')
 q = time.localtime()
 
 ff = time.strftime("%Y年%m月%d日  %H时：%M分" , q)
 
 print(ff)
+
+
+# datetime模块
+# datetime提供日期和时间的运算和表示
+# 常见属性 datetime.date:一个理想的日期 提供year month day 属性
+print(datetime.date(2020,3,26))
+
+# detetime.datetime
+#常用类方法
+# today:
+# now
+# wtcnow
+# fromtimestamp:从时间戳中返回本地时间
+dt = datetime.datetime(2020,4,1)
+print(dt.today())
+print(dt.now())
+print(dt.fromtimestamp(time.time()))
+
+
+# timeit - 时间测量工具
+# 测量程序运行时间间隔试验
+def p():
+    time.sleep(3)
+t2 = time.time()
+p()
+print(time.time() - t2)
+
+# 生成列表两种方法的比较
+# 如果单纯比较生成一个列表的时间，可能很难实现
+c = '''
+sum = []
+for i in range(1000):
+    sum.append(i)
+'''
 
 
