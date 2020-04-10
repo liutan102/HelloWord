@@ -69,6 +69,16 @@ s = ["liutan","love","love","wangxiaona"]
 x = Counter(s)
 print(x)
 
+'''
+调试技术
+调试流程：单元测试->集成测试->交测试部
+- 分类：
+    - 静态调试：
+    - 动态调试：
+pycharm调试：
+    - run/debug模式
+
+'''
 
 
 
