@@ -53,8 +53,68 @@ with open("test01.txt", "r", encoding="UTF-8") as f:
     # 以打开的文件f作为参数，创建列表
     l = list(f)
     for line in l:
-        print(line)
+        print(line,end="")
 
 
-####red是按字符读取文件内容
+####read是按字符读取文件内容
 ##允许输入参数决定读几个，如果没有指定规则，从当前位置读取到结尾；否则从当前位置读取指定个数字符
+print("*" * 8)
+with open("test01.txt","r",encoding="UTF-8") as f:
+    strChar = f.read(1)
+    print(len(strChar))
+    print(strChar)
+
+#作业：使用read 读取文件，每次读取一个，使循环读完
+#尽量保持格式
+
+with open("test01.txt","r",encoding="UTF_8") as f:
+    gooding = list()
+    while True:
+        gooding = f.read(1)
+        print(gooding ,end="")
+
+
+'''
+seek(offset, from)
+    - 移动文件的读取位置，也叫读取指针
+    - from取值范围：
+        - 0：从文件头开始偏移
+        - 1：从文件当前位置开始偏移
+        - 2：从文件末尾开始偏移
+    - 移动的单位是字节（byte）
+    - 一个汉字由若干个字节构成
+    - 返回文件只针对，当前位置
+'''
+# seek案例
+# 打开文件后，从第五个字节开始读取
+# 打开读写指针在0 处，既文件的开头
+print("123123123123123123")
+with open("test01.txt","r",encoding="UTF-8") as f:
+    # seek移动单位是字节
+    f.seek(6,0)
+    xyz = f.read()
+    print(xyz)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
