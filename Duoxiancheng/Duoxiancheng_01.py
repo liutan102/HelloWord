@@ -41,6 +41,12 @@ print("")
         - threading.activeCount:返回正在运行的线程数量，效果跟len(threading,enumerate)相同
         - thr.setName：给线程设置名字
         - thr.getName：得到线程的名字
+    - 直接继承来自threading.Thread
+        - 直接继承Thread
+        - 重写run函数
+        - 类实例可以直接运行
+        - 案例09
+        - 案例10
         
         
         

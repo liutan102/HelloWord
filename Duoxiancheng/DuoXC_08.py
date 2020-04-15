@@ -46,7 +46,7 @@ def main():
     # enumerate 得到正在运行子线程，既子线程1和子线程3
     for thr in threading.enumerate():
         # getName 能够得到线程的名字
-        print("正在运行的线程名字：{}".format(thr.getName()))
+        print("正在运行的线程名字：{0}".format(thr.getName()))
     print("正在运行的子线程数为：{0}".format(threading.activeCount()))
 
     print("All done at :", time.ctime())
@@ -55,3 +55,5 @@ if __name__ == '__main__':
     main()
     while True:
         time.sleep(10)
+
+
