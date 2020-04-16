@@ -1,0 +1,993 @@
+
+### Appium
+
+Appium是一个开源、跨平台的测试框架，可以用来测试原生及混合的移动端应用。Appium支持IOS、Android及FirefoxOS平台。Appium使用WebDriver的json wire协议，来驱动Apple系统的UIAutomation库、Android系统的UIAutomator框架。Appium对IOS系统的支持得益于Dan Cuellar’s对于IOS自动化的研究。Appium也集成了Selendroid，来支持老android版本。
+
+Appium支持Selenium WebDriver支持的所有语言，如java、Object-C、JavaScript、Php、Python、Ruby、C#、Clojure，或者Perl语言，更可以使用Selenium WebDriver的Api。Appium支持任何一种测试框架。如果只使用Apple的UIAutomation，我们只能用javascript来编写测试用例，而且只能用Instruction来运行测试用例。同样，如果只使用Google的UIAutomation，我们就只能用java来编写测试用例。Appium实现了真正的跨平台自动化测试。
+
+#### 技术架构
+
+![](https://cmlanche-1251406926.cos.ap-guangzhou.myqcloud.com/blog/4y4w5.png)
+
+| 功能\Driver      | appium-android-driver                    | appium-uiautomator2-driver               | appium-espresso-driver               |
+| :------------- | :--------------------------------------- | :--------------------------------------- | :----------------------------------- |
+| 用途             | 驱动UIAutomator1                           | 驱动UIAutomator2                           | 驱动espresso                           |
+| automationName | UiAutomator1                             | UiAutomator2                             | Espresso                             |
+| 包形式            | AppiumBootstrap.jar                      | appium-uiautomator2-server-v${version}.apk | TODO待研究                              |
+| 包依赖地址          | bootstrap/bin/                           | appium-uiautomator2-server/apks/         | TODO                                 |
+| 优点             | jar包形式，免安装，一个命令直接启动，权限级别是shell级别         | 官方推荐使用2，对高版本兼容性好                         | 控件识别能力强                              |
+| 缺点             | 对高版本兼容性差，容易无法识别控件                        | apk形式，需要安装                               | apk形式，需求安装，并且是侵入式的，可能带来风险            |
+| Server模块       | 在相同工程中，Bootstrap目录，maven工程，主要目标是在bin目录下输出AppiumBootstrap.jar | 不同工程，单独的另外一个Nodejs工程：appium-uiautomator2-server | 相同Nodejs工程，espress-server目录，gradle工程 |
+
+Appium组件：
+
+Appium Server:是appium的服务器。一个web接口服务，使用nodejs实现
+
+Appium Desktop是一款适用与mac和windowslinunx的开源的应用程序，他以美观而灵活的用户界面提供Appium自动化服务器的强大工具，
+
+#### Appium环境搭建
+
+1.安装node.js  node -v :查看版本 npm -v 是node.js中的包管理的工具，
+
+2.安装appium  可以通过淘宝镜（npm.taobao.org）像 npm install -g cnpm --register=https://reistry.npm.taobao.arg	使用cmd:cnpm install -g appium1.7.2-g
+
+where appium可查看安装路径，运行 cmd: appium
+
+3.安装python
+
+4.安装pycharm
+
+#### Appium会话—— Capability
+
+desired Capabilitys的功能是配置Appium的会话，是一组的键值对的集合，其中键值对设置对应的名称而值设置对应的值，它们将作为JSON对象发送到Appium。
+
+```
+{
+"platformName": "iOS",
+"platformVersion": "11.0",
+"deviceName": "iPhone 7",
+"automationName": "XCUITest",
+"app": "/path/to/my.app"
+}
+```
+
+这组期望的能力的表示为Appium到在iPhone 7模拟器与iOS 11开始自动化会议，使用的愿望[XCUITest驱动](http://appium.io/docs/en/drivers/ios-xcuitest/index.html)，以`/path/to/my.app`作为待测应用程序。
+
+#####session:
+
+Appium的客户端和服务端之间的通信必须在session中的上下文中进行客户端发起通信色时候首先技术逆行json对象给服务器，然后创建session的ID返回客户端，之后客户端可以用session的Id来操作
+
+#####capability配置讲解：
+
+###### 公用的Capability
+
+![img](https://yuedu.baidu.com/bookeditor/interface/imageview?book_id=ee049f357275a417866fb84ae45c3b3567ecdd1b&file=c68cd18390ae28f4fa21221586988f0b.png)
+
+###### android独有的capability
+
+![img](https://yuedu.baidu.com/bookeditor/interface/imageview?book_id=ee049f357275a417866fb84ae45c3b3567ecdd1b&file=6d6b92e23ae105aba3dbac5ff328fb1e.png)
+
+###### ios独有的capability
+
+| 键               | 描述                                       | 实例                    |
+| --------------- | ---------------------------------------- | --------------------- |
+| bundleId        | 捆绑被测试应用的ID。用于在真实设备上启动应用程序或在测试启动期间使用需要捆绑ID的其他大写字母。要使用捆绑包ID在真实设备上运行测试，您可以省略“app”功能，但必须提供“udid”。 | 例如 io.appium.TestApp` |
+| `udid`          | 连接的物理设备的唯一设备标识符                          | 例如 `1ae203187fc012g`  |
+| `launchTimeout` | 在假设挂起并且会话失败之前等待仪器的时间量（以ms为单位）            | 例如 `20000`            |
+| `appName`       | 被测应用程序的显示名称。用于在iOS 9+中自动化应用程序的后台处理。      | 例如， `UICatalog`       |
+
+更多参看http://appium.io/docs/en/writing-running-appium/caps/
+
+#### Capability实现自动登录
+
+启动App进入登录界面，自动输入用户名和密码
+
+`descried_caps['unicodeKeyboard']="ture"`设置这个编码支持中文
+
+`descried_caps['resetKeyBoard']`="true" 设置重置键盘
+
+```
+capability.py
+from appium import webdriver
+descried_caps={}
+descried_caps['platformName']='Android'
+descried_caps['deviceName']='127.0.0.1:62025'
+descried_caps['platformVersion']='5.1.1'
+dedcried_caps['uuid']=''#真机中需要使用，这个是adb中列出的
+dedcried_caps['noRest']='true' #保留上次的
+descried_caps['unicodeKeyboard']="ture" #设置后需要把输入法设置为本机的
+descried_caps['resetKeyBoard']="true"
+descried_caps['app']=''
+descried_caps['appPackage']=''
+descried_caps['appActivity']=''
+driver=webdriver.Romote('http://127.0.0.1:4723',descried_caps)
+```
+
+```python
+from capability import driver
+def login():
+	driver.find_elemet_by_id('').click()
+	driver.find_elemet_by_id('').click()
+try:
+	driver.find_elemet_by_id('')
+except NoSuchElement:
+	login()
+else:
+	driver.find_elment_by_id()
+	
+```
+
+
+
+#### 第一个appium的脚本
+
+```python
+from appium import webdriver
+descried_caps={}
+descried_caps['platformName']='Android'
+descried_caps['deviceName']='127.0.0.1:62025'
+descried_caps['platformVersion']='5.1.1'
+dedcried_caps['uuid']=''#真机中需要使用，这个是adb中列出的
+dedcried_caps['noRest']='true' #保留上次的
+descried_caps['app']=''
+descried_caps['appPackage']=''
+descried_caps['appActivity']=''
+driver=webdriver.Romote('http://127.0.0.1:4723',descried_caps)
+driver.find_element_by_id("id名称").click() #点击
+
+执行即可
+```
+
+学过unittest的都知道里面用前置和后置setup和teardown非常好用，在每次用例开始前和结束后都去执行一次
+
+当然还有更高级一点的setupClass和teardownClass，需配合@classmethod装饰器一起使用
+
+#### Appium元素定位
+
+##### id
+
+使用id定位不会重复，可以用 find_element_by_id()方法查找
+
+find_elements_by_id().click()
+
+find_elements_by_id().clear() 清除这些
+
+###### 检测元素检测是否存在
+
+<u>用if(){}else{}判断元素是否存在时还是会出现异常的不可以用这个来判断，不可以使用这个方法</u>
+
+应该用try catch方法：
+
+```python
+def check_thebuton():  
+	print("check")
+	try:
+		cancelbutton=driver.find_element_by_id('android:id/button1')
+	except NoSuchElementException:
+        print('hhh')
+	else:
+		cancelbutton.click()
+check_thebuton()	
+```
+
+##### name定位:现在已经废弃了
+
+find_element_by_name('请输入用那个户名').send('xx')
+
+##### className定位
+
+classname是根据元素的类型进行定位，但是实际情况中的很多的都是相同的，如果有id则不建议这样使用，重复时只能定义到第一个这样的
+
+find_element_by_name('请输入用那个户名').send('xx')
+
+##### 相对定位
+
+找到元素的父元素的节点然后在找到这个，如果父元素中下面有多个相同的只能调用功第一个
+
+parent=find_element_by_id()
+
+parent.find_element_byclassName("").click()
+
+##### xpath定位
+
+xpath是一种路径的定位方式，主要用于依赖元素绝对路径经定位
+
+1.xpath路径表达式：
+
+​	
+
+| 表达式      | 描述                        |
+| -------- | ------------------------- |
+| /        | 从根节点选取                    |
+| //       | 从匹配选择的当前节点选择文档中的节点，而不考虑位置 |
+| nodename | 选取节点的所有子节点                |
+| .        | 当前节点                      |
+| ..       | 选取当前节点的父节点                |
+| @        | 选取属性                      |
+
+XPath 通配符可用来选取未知的 XML 元素。
+
+| 通配符    | 描述         |
+| :----- | :--------- |
+| *      | 匹配任何元素节点。  |
+| @*     | 匹配任何属性节点。  |
+| node() | 匹配任何类型的节点。 |
+
+driver.find_element_by_path()
+
+##### list定位
+
+相同的classname不能够区分定位，所以就需要获取一个数组下标来获取区分不同的标记元素，
+
+lists_imageviws=driver.find_elements_by_id()
+
+list_imageviews[0].click()
+
+#### Appium元素等待
+
+元素等待的作用，增强脚本的健壮性，提高执行效率
+
+##### 强制等待
+
+设置固定的等待时间，使用sleep()方法即可实现
+
+```
+   from time import sleep #强制等待5秒
+   sleep(5)
+```
+
+##### **隐式等待**
+
+隐式等待是针对全部元素设置的等待时间
+
+```
+driver.implicitly_wait(20)
+```
+
+##### **显式等待**
+
+显式等待是针对某个元素来设置的等待时间。
+法WebDriverWait格式参数如下
+
+```
+from selenium.webdriver.support.ui import WebDriverWait
+
+WebDriverWait(driver, timeout, poll_frequency=0.5, ignored_exceptions=None)
+driver : WebDriver
+timeout : 最长超时时间，默认以秒为单位
+poll_frequency : 休眠时间的间隔时间，默认为0.5秒
+ignored_exceptions : 超时后的异常信息，默认情况下抛NoSuchElementException异常。
+```
+
+WebDriverWait()一般和until()或until_not()方法配合使用，另外，lambda提供了一个运行时动态创建函数的方法。
+
+WebDriverWait()一般和until()或until_not()方法配合使用，另外，lambda提供了一个运行时动态创建函数的方法。
+
+```
+from selenium.webdriver.support.ui import WebDriverWait
+WebDriverWait(driver,10).until(lambda x:x.find_element_by_id("elementID"))
+12
+```
+
+#### Toast元素识别
+
+toast弹窗识别：需要安装selenuim,使用WebDriverWait()一般和until()或until_not()方法配合使用，另外，lambda提供了一个运行时动态创建函数的方法。显示的等待超时后的异常信息，默认情况下抛NoSuchElementException异常。
+
+```python
+#coding=utf-8
+from selenuim.webdriver,support.ui import WebDriverWait
+
+driver.find_element_by_id("com.tal.kaoyan:id/login_email_edittext").clear()
+driver.find_element_by_id("com.tal.kaoyan:id/login_email_edittext").send_keys("zxcx")
+
+driver.find_element_by_id("com.tal.kaoyan:id/login_password_edittext").send_keys("zxcx")
+driver.find_element_by_id("com.tal.kaoyan:id/login_btn").click()
+
+error_message='用户名密码错误'
+limit_message='验证失败'
+message='//*[@text=\text'{}']'.fromat(error_meaasage)
+#message='//*[@text=\text'{}']'.fromat(limit_meaasage)
+#下面的是超时报错
+toast_element=WebDriverWait(driver,5).until(
+WebDriverWait(driver,10).until(lambda x:x.find_element_by_id(message)) 
+print(toast_element.text)
+
+
+```
+
+#### 屏幕截图
+
+##### 方法1
+
+```
+driver.save_screenshot()该方法直接保存当前截图到脚本所在的文件的位置 文件为截图
+driver.save_screenshot("screen.jpg")
+```
+
+##### 方法2
+
+```
+driver.screenshot_as_file(self,filename)将截图保留到指定的文件路径
+```
+
+#### Appium隐藏键盘
+
+使用driver.hide_keyboard()来隐藏
+
+```python
+# 源码中使用这样的
+def hide_keyboard(self, key_name=None, key=None, strategy=None):
+    """Hides the software keyboard on the device.
+
+    In iOS, use `key_name` to press
+    a particular key, or `strategy`. In Android, no parameters are used.
+
+    Args:
+        key_name (:obj:`str`, optional): key to press
+        key (:obj:`str`, optional):
+        strategy (:obj:`str`, optional): strategy for closing the keyboard (e.g., `tapOutside`)
+    """
+    data = {}
+    if key_name is not None:
+        data['keyName'] = key_name
+    elif key is not None:
+        data['key'] = key
+    elif strategy is None:
+        strategy = 'tapOutside'
+    data['strategy'] = strategy
+    self.execute(Command.HIDE_KEYBOARD, data)
+    return self
+```
+
+### UiAutomator定位
+
+当appium中不能识别的可以用这个进行补充使用。
+
+优点：1.可以对所有操作进行自动化，操作简单；
+
+   　　2.不需要对被测程序进行重签名，且，可以测试所有设备上的程序，比如~某APP，比如~拨号，比如~发信息等等
+
+　　   3.对于控件定位，要比robotium简单一点点
+
+ 
+
+缺点：1.uiautomator需要android level 16以上才可以使用，因为在level 16及以上的API里面才带有uiautomator工具
+
+   　　2.如果想要使用resource-id定位控件，则需要level 18及以上才可以
+
+　　   3.对中文支持不好（不代表不支持，第三方jar可以实现）
+
+　　   4.个人感觉，控件定位不如robotium那样层级分明，仅仅个人感觉，用户行为注入还是和插桩有点点区别的
+
+
+
+```python
+import uiautomator2 as u2
+class SimpleTestCase(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.d = u2.connect()
+        cls.d.set_orientation('natural')
+        cls.d.implicitly_wait(10)
+
+    def setUp(self):
+        self.sess = self.d.session("io.appium.android.apis")
+        self.sess.watchers.remove()
+
+    def tearDown(self):
+        self.sess.watchers.remove()
+        def test_toast_get_message(self):
+        d = self.sess
+        d.toast.reset()
+        assert d.toast.get_message(0) is None
+        assert d.toast.get_message(0, default="d") == "d"
+        d(text="App").click()
+        d(text="Notification").click()
+        d(text="NotifyWithText").click()
+        try:
+            d(text="Show Short Notification").click()
+        except u2.UiObjectNotFoundError:
+            d(text="SHOW SHORT NOTIFICATION").click()
+        self.assertEqual(d.toast.get_message(2, 5, ""), "Short notification")
+        time.sleep(.5)
+        self.assertIsNone(d.toast.get_message(0, 0.4))
+        # d.toast.reset()
+        # d.toast.show("Hello world")
+        # self.assertEqual(d.toast.get_message(5, 5), "Hello world")
+
+    def test_scroll(self):
+        d = self.sess
+        d(text="App").click()
+        d(scrollable=True).scroll.to(text="Voice Recognition")
+```
+
+
+
+1. ResourceId定位: `d(resourceId="com.smartisanos.clock:id/text_stopwatch").click()`
+2. Text定位 `d(text="秒表").click()`
+3. Description定位 `d(description="..").click()`
+4. ClassName定位 `d(className="android.widget.TextView").click()`
+
+xpath定位并不支持，一开始打算做支持的，但是发现不用也能搞定。就是代码写的长一点而已。
+
+#### 操作控件
+
+```
+# clickd(text="Settings").click()# long clickd(text="Settings").long_click()# 等待元素的出现d(text="Settings").wait(timeout=10.0)
+```
+
+```
+user =new Uiobject(new UiSelector().text(``"请输入手机号"``))
+user.setText(``"test"``)
+```
+
+```
+首先他会根据你的定位信息new一个对象出来，然后再在你new的对象之上进行相关操作。下面我们看一下在appium中的实现方法:
+ele =self.driver.find_element_by_android_uiautomator('new UiSelector().text("请输入手机号")')
+ele.send_keys("123")
+```
+
+两个代码进行比较我们可以发现他们的相同之处只是最后的定位信息是一样的，即：new UiSelector().text("请输入手机号")
+
+##### text模糊定位
+
+```python
+ele =self.driver.find_element_by_android_uiautomator('new UiSelector().textContains("请输入手")')
+ele.send_keys("123")
+```
+
+##### 正则匹配查找
+
+```pthon
+ele =self.driver.find_element_by_android_uiautomator('new UiSelector().textMatches("^请输入手.*")')
+ele.send_keys("123")
+```
+
+##### resourceID定位
+
+```
+resourceId定位和appium封装好的id定位是一样的，只是这里将写法变成了uiautomator的写法而已，
+ele =self.driver.find_element_by_android_uiautomator('new UiSelector().resourceId("cn.com.open.mooc:id/et_phone_edit")')
+ele.send_keys('234')
+```
+
+##### resourceIDMatches定位
+
+通过id进行正则匹配定位
+
+```
+ele = self.driver.find_element_by_android_uiautomator('new UiSelector().resourceIdMatches(".+et_phone_edit")')
+ele.send_keys('234')
+```
+
+通过className进行定位
+
+```python
+ele =self.driver.find_element_by_android_uiautomator('new UiSelector().className("android.widget.EditText")')
+ele.send_keys('234')
+```
+
+##### classNameMatches定位
+
+通过className正则匹配进行定位
+
+```python
+ele = self.driver.find_element_by_android_uiautomator('new UiSelector().classNameMatches (".*EditText")')
+ele.send_keys('234')
+```
+
+**中文字符的输入**
+如果可以定位到元素，直接通过set_text就可以输入中文
+
+```
+d(text="Settings").set_text("你好")
+```
+
+如果定位不到元素需要使用`send_keys`方法，以及切换输入法
+
+```python
+d.set_fastinput_ime(True)d.send_keys("你好 Hello")d.set_fastinput_ime(False) # 输入法用完关掉
+```
+
+```python
+driver.find_element_by_android_uiautomator\
+
+('new UiSelector().className("android.widget.EditText")').send_keys('1234')
+driver.find_element_by_android_uiautomator\
+('new UiSelector().resourceId("com.tal.kaoyan:id/login_password_editorText")').sendkey("dsds")
+driver.find_element_by_android_uiautomator\
+('new UiSelector().resourceId("com.tal.kaoyan:id/button")').click()
+```
+
+### H5元素定位
+
+针对这种场景直接使用前面所讲的方法来进行定位是行不通的，因为前面的都是基于Andriod原生控件进行元素定位，而Web网页是单独的B/S架构，两者的运行环境不同因此需要进行上下文（context）切换，然后对H5页面元素进行定位操作。
+
+#### context
+
+##### **简介**
+
+Context的中文翻译为：语境; 上下文; 背景; 环境，在开发中我们经常说“上下文”，那么这个“上下文”到底是指什么意思呢？
+
+Android源码中的注释是这么来解释Context的：
+
+Interface to global information about an application environment. This is an abstract class whose implementation is provided by the Android system. It allows access to application-specific resources and classes, as well as up-calls for application-level operations such as launching activities, broadcasting and receiving intents, etc.
+
+在程序中context我们可以理解为当前对象在程序中所处的一个环境。 比如前面提到的App一个界面是属于Activity类型，也就是Android界面环境，但是当访问内嵌的网页是属于另外一个环境（网页环境），两者处于不同的一个环境。
+
+1. 先进入到H5页面，然后切换到context,再进行相关元素定位操作。
+
+2. conetext切换：可以通过contexts()方法来获取到页面的所有context,然后切换到H5页面的context
+
+3. 在H5页面进行元素定位操作
+
+   获取方法实践
+
+   contexts=driver.contexts
+
+   **print**(contexts)   
+
+   #### 实例：
+
+   ```python
+   from  appium import webdriver
+
+   from selenium.webdriver.support.ui import WebDriverWait
+   ```
+
+
+
+
+```python
+desired_caps={}
+
+   desired_caps[‘platformName‘]=‘Android‘
+
+   desired_caps[‘platformVersion‘]=‘5.1.1‘
+
+   desired_caps[‘deviceName‘]=‘127.0.0.1:21503‘
+
+   desired_caps[‘app‘]=r‘C:\Users\Shuqing\Desktop\dr.fone3.2.0.apk‘
+
+   desired_caps[‘appPackage‘]=‘com.wondershare.drfone‘
+
+   desired_caps[‘appActivity‘]=‘com.wondershare.drfone.ui.activity.WelcomeActivity‘
+
+   driver = webdriver.Remote(‘http://localhost:4723/wd/hub‘, desired_caps)
+
+   driver.implicitly_wait(5)
+
+   print(‘click BackupBtn‘)
+
+   driver.find_element_by_id(‘com.wondershare.drfone:id/btnBackup‘).click()
+
+显示等待
+
+   WebDriverWait(driver,8).until(lambda x:x.find_element_by_id(‘com.wondershare.drfone:id/btnRecoverData‘))
+
+   print(‘click NextBtn‘)
+
+   driver.find_element_by_id(‘com.wondershare.drfone:id/btnRecoverData‘).click()
+
+   WebDriverWait(driver,8).until(lambda x:x.find_element_by_class_name(‘android.webkit.WebView‘))
+
+   contexts=driver.contexts
+
+   print(contexts)
+
+需android4.4及以上版本的系统中才会输出更多的webview
+
+   print(‘switch conetext‘)
+
+   driver.switch_to.context(‘WEBVIEW_com.wondershare.drfone‘)
+
+   print(‘edit email‘)
+
+   driver.find_element_by_id(‘email‘).send_keys(‘shuqing@wondershare.cn‘)
+
+   print(‘click sendBtn‘)
+
+   driver.find_element_by_class_name(‘btn_send‘).click()
+
+切换context 点击返回
+
+   driver.switch_to.context(‘NATIVE_APP‘)
+
+   driver.find_element_by_class_name(‘android.widget.ImageButton‘).click()
+
+```
+
+
+
+   ```
+
+### Appuim滑动操作
+
+​```python
+swip.py
+#滑动的演示
+from time import sleep
+from appium import webdriver
+descried_caps={}
+descried_caps['platformName']='Android'
+descried_caps['deviceName']='127.0.0.1:62025'
+descried_caps['platformVersion']='5.1.1'
+dedcried_caps['uuid']=''#真机中需要使用，这个是adb中列出的
+dedcried_caps['noRest']='true' #保留上次的
+descried_caps['unicodeKeyboard']="ture" #设置后需要把输入法设置为本机的
+descried_caps['resetKeyBoard']="true"
+descried_caps['app']=''
+descried_caps['appPackage']=''
+descried_caps['appActivity']=''
+driver=webdriver.Romote('http://127.0.0.1:4723',descried_caps)
+def get_size():
+    x=driver.get_window_size()['width']
+    y=driver.get_window_size()['height']
+    return x,y
+l=get_size()
+print(l)
+
+def swip_left():
+    l=get_size()
+    x1=int(l[0]*0.9)
+    y1=int(l[1]*0.5)
+    x2=int(l[0]*0.1)
+    driver.swipe(x1,y1,x2,y1,1000)
+#上，上滑操作就是从屏幕的下端点击一个坐标然后往上滑动，x坐标可以不变。Y的开始和结束坐标改进即可。
+def swipe_up():
+    l=get_size()
+    x1=int(l[0]*0.5)
+    y1=int(l[1]*0.75)
+    x2=int(l[0]*0.5)
+    y2=int(l[1]*0.25)
+    driver.swipe(x1,y1,x2,y2,1000)
+#下滑就是从屏幕的上端点击一个坐标然后往下滑动到另外一个坐标，x坐标可以不变。Y的开始和结束坐标改变即可。
+def swipe_down():
+     l=get_size()
+    x1=int(l[0]*0.5)
+    y1=int(l[1]*0.25)
+    x2=int(l[0]*0.5)
+    y2=int(l[1]*0.75)
+    driver.swipe(x1,y1,x2,y2,1000)
+def swipe_right():
+    swipe_down():
+     l=get_size()
+    x1=int(l[0]*0.25)
+    y1=int(l[1]*0.5)
+    x2=int(l[0]*0.75)
+    y2=int(l[1]*0.5)
+    driver.swipe(x1,y1,x2,y2,1000)
+for i in rang(2):
+    swipleft()
+    sleep(5)
+#然后操作其他的即可
+   ```
+
+### Appium连续滑动-TouchAction
+
+滑动操作是两点之间的滑动，而实际上用户可通过多点连续划动的操作需要使用TouchAction,TouchAction包含的一些操作：按压，长按，点击，移动，暂停，使用前需导入 from appium.webdriver.common.touch_action import TouchAction
+
+#### 1、按压控件
+
+------
+
+方法：press()
+
+开始按压一个元素或坐标点（x,y）。通过手指按压手机屏幕的某个位置。
+
+**press(WebElement el, int x, int y)** press也可以接收屏幕的坐标（x,y）。
+
+例：
+
+```
+TouchAction(driver).press(x=0,y=308).release().perform()
+```
+
+除了press()方法之外，本例中还用到了别外两个新方法。
+
+- release() 结束的行动取消屏幕上的指针。
+- Perform() 执行的操作发送到服务器的命令操作。
+
+#### 2、长按控件
+
+------
+
+方法：longPress()开始按压一个元素或坐标点（x,y）。 相比press()方法，longPress()多了一个入参，既然长按，得有按的时间吧。duration以毫秒为单位。1000表示按一秒钟。其用法与press()方法相同。
+
+**longPress(WebElement el, int x, int y, Duration duration)**
+
+例： `java TouchAction action = new TouchAction(driver); action.longPress(names.get(1),1000).perform().release(); action.longPress(1 ,302,1000).perform().release();`
+
+#### 3、点击控件
+
+------
+
+方法：tap()对一个元素或控件执行点击操作。用法参考press()。
+
+**tap(WebElement el, int x, int y)**
+
+例： `java TouchAction action = new TouchAction(driver); action.tap(names.get(1)).perform().release(); action.tap(1 ,302).perform().release();`
+
+#### 4、移动
+
+------
+
+方法：moveTo()将指针（光标）从过去指向指定的元素或点。
+
+**movTo(WebElement el, int x, int y)**
+
+其用法参考press()方法。
+
+例： `Java TouchAction action = new TouchAction(driver); action.moveTo(names.get(1)).perform().release(); action.moveTo(1 ,302).perform().release();`
+
+#### 5、暂停
+
+------
+
+方法：wait()暂停脚本的执行，单位为毫秒。 `Java action.wait(1000);`
+
+### Appium多点操作-MulitAction
+
+
+
+### 断言（assert)
+
+Python assert（断言）用于判断一个表达式，在表达式条件为 false 的时候触发异常。
+
+`pytest`允许您使用标准python `assert`来验证Python测试中的期望值和值
+
+语法格式如下：
+
+```
+assert expression
+```
+
+等价于：
+
+```
+if not expression:
+    raise AssertionError
+```
+
+assert 后面也可以紧跟参数:
+
+```
+assert expression [, arguments]
+```
+
+等价于：
+
+```
+if not expression:
+    raise AssertionError(arguments)
+```
+
+```python
+def test_updatet_other(begin):
+    engagement_page.click_update_items_first()  # 选择第一条
+    engagement_page.click_btn1_all()
+    edit_other_page.click_other_input('other update')  # 更新
+    edit_other_page.click_submit_btn()
+    engagement_page.should_no_red_icon()
+    other_name = engagement_page.get_first_item_content_text()
+    assert other_name == "Other update"
+    engagement_page.click_delete_first_note()
+
+```
+
+
+
+### pytest
+
+`ytest`是一个框架，使构建简单和可伸缩的测试变得容易。测试具有表现力和可读性 - 无需样板代码。通过针对您的应用程序或库的小型单元测试或复杂功能测试，在几分钟内开始使用。
+
+#### 安装`pytest`
+
+1. 在命令行中运行以下命令：
+
+```
+pip install -U pytest
+
+```
+
+1. 检查您是否安装了正确的版本：
+
+```
+$ pytest --version
+This is pytest version 5.x.y, imported from $PYTHON_PREFIX/lib/python3.6/site-packages/pytest.py
+
+```
+
+#### 创建你的第一个测试
+
+使用四行代码创建一个简单的测试函数：
+
+```
+# content of test_sample.py
+def func(x):
+    return x + 1
+
+def test_answer():
+    assert func(3) == 5
+```
+
+一旦开发了多个测试，您可能希望将它们分组到一个类中。pytest可以很容易地创建一个包含多个测试的类：
+
+```
+# content of test_class.py
+class TestClass(object):
+    def test_one(self):
+        x = "this"
+        assert 'h' in x
+
+    def test_two(self):
+        x = "hello"
+        assert hasattr(x, 'check')
+```
+
+```python
+# coding=utf-8
+import pytest
+from page.LoginPage import LoginPage
+from util.ConfigUtil import ConfigUtil
+from util.ApiUtil import ApiUtil
+
+
+@pytest.fixture(scope="session", autouse=True)
+def begin():
+    api_util = ApiUtil()
+
+    account = api_util.create_account()
+    username = account["agencyOwner"]["userName"]
+    password = account["agencyOwner"]["password"]
+    print username
+    login_page = LoginPage()
+    login_page.login(username, password)
+
+
+"""执行当前目录下面的可以进行全部测试"""
+if __name__ == '__main__':
+    pytest.main()
+#调用pytest.main()将导致导入测试及其导入的任何模块。由于python导入系统的缓存机制，pytest.main()从同一进程进行后续调用不会反映调用之间对这些文件的更改。因此，pytest.main()不建议从同一进程进行多次调用（例如，为了重新运行测试）
+```
+
+####对于@pytest.fixture（）的用法有：
+
+对于scope可能的值`scope`有：`function`，`class`，`module`，`package`或`session`。
+
+直接说一下吧：
+
+| session  | 在一次Run或Debug中执行的所有case共享一个session,第一个case开始执行的时候session开始，最后一个case执行结束的时候session结束，这些case可能分布在不同的class或module中。 |
+| -------- | ---------------------------------------- |
+| module   | 一个.py文件可以看作一个module，其表示的范围指该文件中第一个case到最后一个case之间的范围 |
+| class    | 表示的范围即class的范围	一个类中执行一次                  |
+| function | 表示的范围即function的范围 每次都会执行一次               |
+
+下一个示例将fixture函数放入单独的`conftest.py`文件中，以便来自目录中多个测试模块的测试可以访问fixture函数：
+
+```
+# content of conftest.py
+import pytest
+import smtplib
+
+@pytest.fixture(scope="module")
+def smtp_connection():
+    return smtplib.SMTP("smtp.gmail.com", 587, timeout=5)
+```
+
+源码：
+
+```python
+def fixture(scope="function", params=None, autouse=False, ids=None, name=None):
+
+    :arg scope: the scope for which this fixture is shared, one of
+                ``"function"`` (default), ``"class"``, ``"module"``,
+                ``"package"`` or ``"session"``.
+
+                ``"package"`` is considered **experimental** at this time.
+
+    :arg params: an optional list of parameters which will cause multiple
+                invocations of the fixture function and all of the tests
+                using it.
+                The current parameter is available in ``request.param``.
+
+    :arg autouse: if True, the fixture func is activated for all tests that
+                can see it.  If False (the default) then an explicit
+                reference is needed to activate the fixture.
+
+    :arg ids: list of string ids each corresponding to the params
+                so that they are part of the test id. If no ids are provided
+                they will be generated automatically from the params.
+
+    :arg name: the name of the fixture. This defaults to the name of the
+                decorated function. If a fixture is used in the same module in
+                which it is defined, the function name of the fixture will be
+                shadowed by the function arg that requests the fixture; one way
+                to resolve this is to name the decorated function
+                ``fixture_<fixturename>`` and then use
+                ``@pytest.fixture(name='<fixturename>')``.
+    """
+    if callable(scope) and params is None and autouse is False:
+        # direct decoration
+        return FixtureFunctionMarker("function", params, autouse, name=name)(scope)
+    if params is not None and not isinstance(params, (list, tuple)):
+        params = list(params)
+    return FixtureFunctionMarker(scope, params, autouse, ids=ids, name=name)
+
+```
+
+具体其他的用法请看官网吧<https://docs.pytest.org/en/latest/usage.html#cmdline>
+
+#### 前置条件，后置条件
+
+##### 模块级别设置 /拆卸
+
+如果在单个模块中有多个测试函数和测试类，则可以选择实现以下fixture方法，这些方法通常会针对所有函数调用一次：
+
+```
+def setup_module(module):
+    """ setup any state specific to the execution of the given module."""
+
+def teardown_module(module):
+    """ teardown any state that was previously setup with a setup_module
+    method.
+    """
+
+```
+
+从pytest-3.0开始，`module`参数是可选的。
+
+##### 类级别设置 /拆解
+
+类似地，在调用类的所有测试方法之前和之后，在类级别调用以下方法：
+
+```
+@classmethod
+def setup_class(cls):
+    """ setup any state specific to the execution of the given class (which
+    usually contains tests).
+    """
+
+@classmethod
+def teardown_class(cls):
+    """ teardown any state that was previously setup with a call to
+    setup_class.
+    """
+
+```
+
+##### 方法和功能级别
+
+同样，围绕每个方法调用调用以下方法：
+
+```
+def setup_method(self, method):
+    """ setup any state tied to the execution of the given method in a
+    class.  setup_method is invoked for every test method of a class.
+    """
+
+def teardown_method(self, method):
+    """ teardown any state that was previously setup with a setup_method
+    call.
+    """
+
+```
+
+从pytest-3.0开始，`method`参数是可选的。
+
+如果您希望直接在模块级别定义测试函数，还可以使用以下函数来实现fixture：
+
+```
+def setup_function(function):
+    """ setup any state tied to the execution of the given function.
+    Invoked for every test function in the module.
+    """
+
+def teardown_function(function):
+    """ teardown any state that was previously setup with a setup_function
+    call.
+    """
+
+```
+
+从pytest-3.0开始，`function`参数是可选的。
